@@ -1,30 +1,25 @@
-import { Container, Nav, Navbar, Row } from 'react-bootstrap';
 import './App.css';
-import { Routes, Route, useNavigate, Outlet } from 'react-router-dom';
-import data from './data';
-import Home from './pages/Home';
-import Detail from './pages/Detail';
-import { useEffect, useState } from 'react';
+
+import { Container, Nav, Navbar } from 'react-bootstrap';
+import { Routes, Route, useNavigate } from 'react-router-dom';
+import { useQuery } from 'react-query';
+import { lazy, Suspense, useState, useTransition } from 'react';
 import axios from 'axios';
-import Cart from './pages/Cart';
+
+const Home = lazy(() => import('./pages/Home'));
+const Detail = lazy(() => import('./pages/Detail'));
+const Cart = lazy(() => import('./pages/Cart'));
 
 function App() {
-    const [shoes, setShoes] = useState(data);
-
-    useEffect(() => {
-        axios
-            .get('https://codingapple1.github.io/shop/data2.json')
-            .then((response) => {
-                setShoes([...shoes, ...response.data]);
-            })
-            .catch((error) => console.log(error));
-
-        return () => {
-            setShoes(data);
-        };
-    }, []);
-
     const navigate = useNavigate();
+
+    const result = useQuery('query', () =>
+        axios
+            .get('https://codingapple1.github.io/userdata.json')
+            .then((response) => {
+                return response.data;
+            })
+    );
 
     return (
         <div className='App'>
@@ -39,17 +34,19 @@ function App() {
                             Cart
                         </Nav.Link>
                     </Nav>
+                    <Nav className='ms-auto'>
+                        {result.isLoading ? '로딩중' : result.data.name}
+                    </Nav>
                 </Container>
             </Navbar>
-            <Routes>
-                <Route path='/' element={<Home />} />
-
-                <Route path='/detail/:id' element={<Detail />} />
-
-                <Route path='/cart' element={<Cart />} />
-
-                <Route path='*' element={<div>404</div>}></Route>
-            </Routes>
+            <Suspense fallback={<div>로딩중</div>}>
+                <Routes>
+                    <Route path='/' element={<Home />} />
+                    <Route path='/detail/:id' element={<Detail />} />
+                    <Route path='/cart' element={<Cart />} />
+                    <Route path='*' element={<div>404</div>}></Route>
+                </Routes>
+            </Suspense>
         </div>
     );
 }

@@ -1,6 +1,7 @@
 import { Button, Table } from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
-import { changeName, increase } from '../store/userSlice';
+// import { changeName, increase } from '../store/userSlice';
+import { increase } from '../store';
 
 interface cartType {
     id: number;
@@ -17,7 +18,6 @@ export default function Cart() {
             <h6>
                 {user.name} {user.age}의 장바구니
             </h6>
-            <Button onClick={() => dispatch(increase(10))}>버튼</Button>
             <Table>
                 <thead>
                     <tr>
@@ -35,8 +35,10 @@ export default function Cart() {
                             <td>{item.count}</td>
                             <td>
                                 <Button
-                                    onClick={() => dispatch(changeName())}
-                                ></Button>
+                                    onClick={() => dispatch(increase(item.id))}
+                                >
+                                    +
+                                </Button>
                             </td>
                         </tr>
                     ))}

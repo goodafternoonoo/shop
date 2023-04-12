@@ -11,6 +11,8 @@ interface shoeType {
 
 export default function Home() {
     const [count, setCount] = useState(0);
+    const [watched] = useState(localStorage.getItem('watched') || '[]');
+
     const { shoes }: shoeType = useSelector(
         (state: ReturnType<typeof store.getState>) => state
     );
@@ -19,7 +21,12 @@ export default function Home() {
 
     return (
         <>
-            <div className='main-bg'></div>
+            <div className='main-bg'>
+                {watched &&
+                    JSON.parse(watched).map((item: string) => (
+                        <h4 key={item}>{item}</h4>
+                    ))}
+            </div>
             <Container>
                 <Row>
                     {shoes.map((shoe) => (
@@ -37,11 +44,6 @@ export default function Home() {
                                 }.json`
                             )
                             .then((response) => {
-                                // setShoes((shoes) => [
-                                //     ...shoes,
-                                //     ...response.data,
-                                // ]);
-
                                 dispatch(
                                     setShoes([...shoes, ...response.data])
                                 );

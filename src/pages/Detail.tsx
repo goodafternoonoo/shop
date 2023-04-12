@@ -1,18 +1,25 @@
 import { useEffect, useState } from 'react';
 import { Nav } from 'react-bootstrap';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import store from '../store';
+import { add } from '../store';
 
 interface shoeType {
     shoes: { id: number; title: string; content: string; price: number }[];
 }
+interface cartType {
+    id: number;
+    name: string;
+    count: number;
+}
 
 export default function Detail() {
-    const { shoes }: shoeType = useSelector(
+    const { shoes, cart }: any = useSelector(
         (state: ReturnType<typeof store.getState>) => state
     );
-    
+
+    const dispatch = useDispatch();
 
     const [count, setCount] = useState(2);
     const [alert, setAlert] = useState(true);
@@ -36,7 +43,19 @@ export default function Detail() {
     }, []);
 
     const { id } = useParams();
-    const shoe = shoes.find((shoe) => shoe.id === Number(id));
+    const shoe = shoes.find((shoe: { id: number }) => shoe.id === Number(id));
+
+    let watched = localStorage.getItem('watched');
+    if (watched) watched = JSON.parse(watched);
+
+    let list: string[] = [];
+
+    if (watched && Array.isArray(watched)) {
+        watched.unshift(id);
+        list = [...new Set(watched)];
+    }
+
+    localStorage.setItem('watched', JSON.stringify(list));
 
     return (
         <div className={`container start ${fade}`}>
@@ -58,7 +77,12 @@ export default function Detail() {
                     <h4 className='pt-5'>{shoe?.title}</h4>
                     <p>{shoe?.content}</p>
                     <p>{(shoe?.price as number).toLocaleString()}원</p>
-                    <button className='btn btn-danger'>주문하기</button>
+                    <button
+                        onClick={() => dispatch(add(shoe))}
+                        className='btn btn-danger'
+                    >
+                        주문하기
+                    </button>
                 </div>
             </div>
 
